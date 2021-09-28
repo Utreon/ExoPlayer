@@ -48,14 +48,16 @@ jobs:
         cd "${AV1_EXT_ROOT}"
         ../../gradlew build --stacktrace --info
 
-    - uses: actions/upload-artifact@master
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@master
       if: ${{ !contains(github.event.pull_request.user.login, 'dependabot[bot]') }}
       with:
         name: extension-av1
         path: extensions/av1/buildout/outputs/aar/
 
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      if: ${{ github.event_name == 'push' }}    
+    - name: Create a new release
+      uses: "marvinpinto/action-automatic-releases@latest"
+      if: ${{ github.event_name == 'push' && startsWith('refs/tags/v', github.ref) }}
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
