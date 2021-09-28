@@ -12,19 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+if (project.hasProperty("version_number")) {
+    releaseVersion = "${version_number}"
+}
+
 apply plugin: 'maven-publish'
 afterEvaluate {
     publishing {
         repositories {
             maven {
-                url = findProperty('mavenRepo') ?: "${buildDir}/repo"
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/Utreon/Exoplayer")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR")
+                    password = System.getenv("GITHUB_TOKEN")
+                }
             }
         }
         publications {
             release(MavenPublication) {
                 from components.release
                 artifact androidSourcesJar
-                groupId = 'com.google.android.exoplayer'
+                groupId = 'com.utreon.android.exoplayer'
                 artifactId = releaseArtifactId
                 version releaseVersion
                 pom {
@@ -39,12 +48,12 @@ afterEvaluate {
                     }
                     developers {
                         developer {
-                            name = 'The Android Open Source Project'
+                            name = 'Utreon Engineering'
                         }
                     }
                     scm {
-                        connection = 'scm:git:https://github.com/google/ExoPlayer.git'
-                        url = 'https://github.com/google/ExoPlayer'
+                        connection = 'scm:git:https://github.com/Utreon/ExoPlayer.git'
+                        url = 'https://github.com/Utreon/ExoPlayer'
                     }
                 }
             }
