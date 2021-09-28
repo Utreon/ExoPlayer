@@ -50,17 +50,16 @@ jobs:
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@master
-      if: ${{ !contains(github.event.pull_request.user.login, 'dependabot[bot]') }}
       with:
         name: extension-av1
         path: extensions/av1/buildout/outputs/aar/
 
     - name: Create a new release
       uses: "marvinpinto/action-automatic-releases@latest"
-      if: ${{ github.event_name == 'push' && startsWith('refs/tags/v', github.ref) }}
+      if: startsWith(github.ref, 'refs/tags/v')
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         files: |
-          extensions/av1/buildout/outputs/aar/*.aar
+          extensions/av1/buildout/outputs/aar/*
 
