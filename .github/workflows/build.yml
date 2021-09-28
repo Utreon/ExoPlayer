@@ -1,0 +1,64 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ release-v2 ]
+    tags:
+      - "v*"
+  pull_request:
+    branches: [ release-v2 ]
+
+jobs:
+  build-av1:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+        cache: gradle
+
+    - name: Nuke CMake 3.18.1-g262b901
+      run: |
+        /usr/local/lib/android/sdk/tools/bin/sdkmanager --uninstall 'cmake;3.18.1'
+        sudo rm /usr/local/bin/cmake
+
+    - name: Preparation
+      run: |
+        EXOPLAYER_ROOT="$(pwd)"
+        AV1_EXT_PATH="${EXOPLAYER_ROOT}/extensions/av1/src/main"
+        cd "${AV1_EXT_PATH}/jni"
+        git clone https://github.com/google/cpu_features
+        git clone https://chromium.googlesource.com/codecs/libgav1
+        cd "${AV1_EXT_PATH}/jni/libgav1"
+        git clone https://github.com/abseil/abseil-cpp.git third_party/abseil-cpp
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: |
+        EXOPLAYER_ROOT="$(pwd)"
+        AV1_EXT_ROOT="${EXOPLAYER_ROOT}/extensions/av1"
+        cd "${AV1_EXT_ROOT}"
+        ../../gradlew build --stacktrace --info
+
+    - uses: actions/upload-artifact@master
+      if: ${{ !contains(github.event.pull_request.user.login, 'dependabot[bot]') }}
+      with:
+        name: extension-av1
+        path: extensions/av1/buildout/outputs/aar/
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      if: ${{ github.event_name == 'push' }}    
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          extensions/av1/buildout/outputs/aar/*.aar
+
