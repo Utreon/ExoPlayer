@@ -38,22 +38,17 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build :extension-av1
+      - name: Build
         run: |
           ./gradlew :extension-av1:build --info
-
-      - name: Build :library-decoder
-        run: |
           ./gradlew :library-decoder:build --info
+          ./gradlew :library-common:build --info
 
-      - name: Upload :extension-av1
+      - name: Upload Articats
         uses: actions/upload-artifact@master
         with:
-          name: extension-av1
-          path: extensions/av1/buildout/outputs/aar/
-
-      - name: Upload :library-decoder
-        uses: actions/upload-artifact@master
-        with:
-          name: library-decoder
-          path: library/decoder/buildout/outputs/aar/
+          name: artifacts
+          path: |
+            extensions/av1/buildout/outputs/aar/
+            library/decoder/buildout/outputs/aar/
+            library/common/buildout/outputs/aar/

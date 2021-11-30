@@ -40,25 +40,20 @@ jobs:
       - name: Set env
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
 
-      - name: Build :extension-av1
+      - name: Build
         run: |
           ./gradlew :extension-av1:build --info
-
-      - name: Build :library-decoder
-        run: |
           ./gradlew :library-decoder:build --info
+          ./gradlew :library-common:build --info
 
-      - name: Upload :extension-av1
+      - name: Upload Articats
         uses: actions/upload-artifact@master
         with:
-          name: extension-av1
-          path: extensions/av1/buildout/outputs/aar/
-
-      - name: Upload :library-decoder
-        uses: actions/upload-artifact@master
-        with:
-          name: library-decoder
-          path: library/decoder/buildout/outputs/aar/
+          name: artifacts
+          path: |
+            extensions/av1/buildout/outputs/aar/
+            library/decoder/buildout/outputs/aar/
+            library/common/buildout/outputs/aar/
 
       - name: Create a new GitHub release
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -68,6 +63,7 @@ jobs:
           files: |
             extensions/av1/buildout/outputs/aar/*
             library/decoder/buildout/outputs/aar/*
+            library/common/buildout/outputs/aar/*
 
       - name: Publish :extension-av1 to GitHub Maven Repo
         env:
@@ -80,3 +76,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./gradlew -Pversion_number=${{ env.RELEASE_VERSION }} :library-decoder:publish --info
+
+      - name: Publish :library-common to GitHub Maven Repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./gradlew -Pversion_number=${{ env.RELEASE_VERSION }} :library-common:publish --info
