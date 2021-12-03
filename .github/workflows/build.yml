@@ -2,50 +2,53 @@ name: CI
 
 on:
   push:
-    branches: [ release-v2 ]
+    branches: [release-v2]
   pull_request:
-    branches: [ release-v2 ]
+    branches: [release-v2]
 
 jobs:
   build-av1:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: set up JDK 11
-      uses: actions/setup-java@v2
-      with:
-        java-version: '11'
-        distribution: 'adopt'
-        cache: gradle
+      - name: set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: "11"
+          distribution: "adopt"
+          cache: gradle
 
-    - name: Nuke CMake 3.18.1-g262b901
-      run: |
-        /usr/local/lib/android/sdk/tools/bin/sdkmanager --uninstall 'cmake;3.18.1'
-        sudo rm /usr/local/bin/cmake
+      - name: Nuke CMake 3.18.1-g262b901
+        run: |
+          /usr/local/lib/android/sdk/tools/bin/sdkmanager --uninstall 'cmake;3.18.1'
+          sudo rm /usr/local/bin/cmake
 
-    - name: Preparation
-      run: |
-        EXOPLAYER_ROOT="$(pwd)"
-        AV1_EXT_PATH="${EXOPLAYER_ROOT}/extensions/av1/src/main"
-        cd "${AV1_EXT_PATH}/jni"
-        git clone https://github.com/google/cpu_features
-        git clone https://chromium.googlesource.com/codecs/libgav1
-        cd "${AV1_EXT_PATH}/jni/libgav1"
-        git clone https://github.com/abseil/abseil-cpp.git third_party/abseil-cpp
+      - name: Preparation
+        run: |
+          EXOPLAYER_ROOT="$(pwd)"
+          AV1_EXT_PATH="${EXOPLAYER_ROOT}/extensions/av1/src/main"
+          cd "${AV1_EXT_PATH}/jni"
+          git clone https://github.com/google/cpu_features
+          git clone https://chromium.googlesource.com/codecs/libgav1
+          cd "${AV1_EXT_PATH}/jni/libgav1"
+          git clone https://github.com/abseil/abseil-cpp.git third_party/abseil-cpp
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-    - name: Build with Gradle (non - release)
-      run: |
-        ./gradlew :extension-av1:build --info
+      - name: Build
+        run: |
+          ./gradlew :extension-av1:build --info
+          ./gradlew :library-decoder:build --info
+          ./gradlew :library-common:build --info
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@master
-      with:
-        name: extension-av1
-        path: extensions/av1/buildout/outputs/aar/
-
+      - name: Upload Articats
+        uses: actions/upload-artifact@master
+        with:
+          name: artifacts
+          path: |
+            extensions/av1/buildout/outputs/aar/
+            library/decoder/buildout/outputs/aar/
+            library/common/buildout/outputs/aar/
