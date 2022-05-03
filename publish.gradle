@@ -57,9 +57,6 @@ afterEvaluate {
                         connection = 'scm:git:https://github.com/Utreon/ExoPlayer.git'
                         url = 'https://github.com/Utreon/ExoPlayer'
                     }
-                    withXml {
-                        addMissingAarTypeToXml(it)
-                    }
                 }
             }
         }
