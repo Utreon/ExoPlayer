@@ -17,6 +17,8 @@ if (project.hasProperty("version_number")) {
 }
 
 apply plugin: 'maven-publish'
+apply from: "$gradle.ext.exoplayerSettingsDir/missing_aar_type_workaround.gradle"
+
 afterEvaluate {
     publishing {
         repositories {
